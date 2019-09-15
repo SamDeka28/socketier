@@ -1,0 +1,558 @@
+<html>
+
+<head>
+	<link href="./public/bootstrap.min.css" rel="stylesheet" />
+	<link href="./public/fontawesome/css/all.css" rel="stylesheet" />
+	<link href="./public/json.json-viewer/jquery.json-viewer.css" rel="stylesheet" />
+
+	<style>
+		body {
+			font-family: "Corbel";
+		}
+
+		.brandHeader{
+			transition : all 0.5s ease-in-out;
+		}
+		
+		.brandHeader-connected {
+			background-color: #378b29;
+			background-image: linear-gradient(315deg, #378b29 0%, #74d680 74%);
+		}
+		
+		.brandHeader-default {
+			background-color: #a4508b;
+			background-image: linear-gradient(326deg, #a4508b 0%, #5f0a87 74%);
+		}
+		
+		.plabel {
+			font-size: 18px;
+			padding: 6px 12px;
+		}
+		
+		#brand-title {
+			color: #eee;
+			text-decoration: none;
+		}
+		
+		.navbar {
+			border-radius: 0px !important;
+		}
+		
+		.connection-status.status-online {
+			display: initial;
+		}
+		
+		.connection-status.status-offline {
+			display: none;
+		}
+		
+		.text-invisible {
+			visibility: hidden;
+		}
+		
+		.mt-4 {
+			margin-top: 4px
+		}
+		
+		.topLevelTabList .nav-link {
+			text-decoration: none;
+			color: #777;
+			font-weight: bold;
+			font-size: 18px
+		}
+		
+		.topLevelTabList a:not(.active):hover {
+			border: 1px solid transparent !important;
+			/*border :transparent;*/
+		}
+		
+		.topLevelTabList .nav-link.active {
+			/*border-top: solid #28a745;*/
+			border-top: solid darkorange;
+			border-radius: 0px;
+			/*background :#eee;*/
+			/*color:#ddd;*/
+		}
+		
+		.topLevelTabList {
+			width: 100%;
+			/*background : #343a40!important;*/
+			background: whitesmoke;
+		}
+		
+		.eventTabList .nav-link.active {
+			background: #343a40;
+			border-color: #343a40;
+			color: #ddd;
+		}
+		
+		.callbackResponse {
+			background: #ddd;
+		}
+		/*.topLevelTabContent{
+			padding:0px !important;
+		}*/
+		
+		.callback-header {}
+		
+		.server-error {
+			color: #888;
+		}
+		
+		.response {
+			background: whitesmoke;
+			padding: 10;
+			color: #888;
+		}
+		
+		.response.response-hidden {
+			display: none;
+		}
+		
+		.server-error-container {
+			padding: 0px 20px;
+		}
+		
+		.server-error-container-hidden {
+			display: none;
+		}
+		
+		.appendResponse {
+			max-height: 300px;
+			overflow-y: scroll;
+			position: relative;
+		}
+		
+		.
+	</style>
+</head>
+
+<body>
+	<section class="brandHeader brandHeader-default navbar navbar-light" style="padding-left:20px">
+		<h3><a href="#" id="brand-title">Socketier</a></h3>
+	</section>
+	<!--CONNECTION TAB-->
+	<div class="container-fluid bg-dark pt-1 pb-4">
+		<section class="connection">
+			<div class="row mt-4">
+				<div class="col-lg-8 col-md-8 col-sm-8 ">
+					<div class="input-group">
+						<div class="input-group-prepend">
+							<span class="input-group-text"><strong>Host</strong></span>
+						</div>
+						<input class="form-control" id="host" name="host" placeholder="Eg. http://127.0.0.1:4000" value="http://" />
+					</div>
+				</div>
+				<div class="col-lg-3 col-md-3 col-sm-3 form-check form-check-inline">
+					<div class="btn-group">
+						<button class="btn btn-light " type="button" data-toggle="modal" data-target="#configModal">Configure Options
+						<i class="fas fa-cogs"></i></button>
+						<button class="btn btn-primary" type="button" id="connect">Connect</button>
+					</div>
+				</div>
+			</div>
+		</section>
+	</div>
+	<div class="container-fluid mt-4">
+		<div class="row add-event">
+			<div class="col-md-12 col-lg-12 col-sm-12">
+				<div class="btn-group" data-toggle="modal" data-target="#eventModal">
+					<button class="btn btn-secondary" type="button"><span class="text-invisible">i</span><i class="fa fa-plus"></i><span class="text-invisible">i</span></button>
+					<button class="btn btn-light" type="button">Add Event</button>
+				</div>
+			</div>
+		</div>
+		<div class="row mt-4">
+			<!--NAVIGATION TABS-->
+			<ul class="nav nav-tabs topLevelTabList" role="tablist">
+				<li class="nav-item active">
+					<a class="nav-link active " data-toggle="tab" id="emitsTab" href="#emits">Emits</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" data-toggle="tab" id="listenersTab" href="#listens">Listeners</a>
+				</li>
+			</ul>
+			<div class="col-md-12 col-lg-12 col-sm-12 topLevelTabContent">
+				<!--TABS CONTENTS-->
+				<div class="tab-content mt-4">
+					<div id="emits" class="row tab-pane active">
+						<div class="col-md-12 col-lg-12 col-sm-12">
+							<!--EVENT NAVIGATION TABS-->
+							<ul class="nav nav-tabs eventTabList" role="tablist">
+							</ul>
+						</div>
+						<!--EVENT TABS CONTENTS-->
+						<div class="tab-content emitTabs">
+						</div>
+					</div>
+					<div id="listens" class="container-fluid tab-pane">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!--MODAL:::CONNECTION CONFIGURATION-->
+	<div class="modal fade" id="configModal">
+		<div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4><i class="fas fa-cogs"></i></h4>
+				</div>
+				<div class="modal-body">
+					<div class="row">
+						<div class="col-lg-4 col-md-4 col-sm-4">
+							<p class="plabel">Path</p>
+						</div>
+						<div class="col-lg-8 col-md-8 col-sm-8">
+							<input class="form-control" name="path" placeholder="(Optional) Eg. /socket.io" />
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-lg-12 col-md-12 col-sm-12">
+							<div class="row mt-4 payloadTable">
+								<div class="col-lg-11 col-md-11 col-sm-11 text-left">
+									<p class="plabel">Query Params</p>
+								</div>
+								<div class="col-lg-1 col-md-1 col-sm-1 text-right">
+									<button type="button" class="btn btn-light btn-block addConfigQuery"><i class="fa fa-plus"></i></button>
+								</div>
+								<table class="table table-bordered table-sm">
+									<thead class="thead-dark">
+										<tr>
+											<th></th>
+											<th>Key</th>
+											<th>Value</th>
+										</tr>
+									</thead>
+									<tbody class="appendableQuery">
+										<tr>
+											<td></td>
+											<td><input name="key" type="text" class="form-control form-control-sm" /></td>
+											<td><input name="value" type="text" class="form-control form-control-sm" /></td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-sm btn-primary" id="saveConfig" type="button" id="save" data-dismiss="modal">Save</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--ADD EVENT MODAL-->
+	<div class="modal fade" id="eventModal">
+		<div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5><span> Add Event</span></h5>
+				</div>
+				<div class="modal-body">
+					<div class="row">
+						<div class="col-lg-6 col-md-6 col-sm-6">
+							<div class="input-group">
+								<div class="input-group-prepend">
+									<span class="input-group-text"><strong>Event</strong></span>
+								</div>
+								<input class="form-control" id="iEventName" name="event" placeholder="Eg. MyEvent" />
+							</div>
+						</div>
+						<div class="col-lg-6 col-md-6 col-sm-6">
+							<div class="input-group">
+								<div class="input-group-prepend">
+									<span class="input-group-text"><strong>Type</strong></span>
+								</div>
+								<select class="form-control" id="eventType" name="eventType">
+									<option value="emit">Emit</option>
+									<option value="listen">Listen</option>
+									</select>
+							</div>
+						</div>
+					</div>
+					<div class="row mt-4 payloadTable">
+						<div class="col-lg-11 col-md-11 col-sm-11 text-left">
+							<span><strong>Payload</strong></span>
+						</div>
+						<div class="col-lg-1 col-md-1 col-sm-1 text-right">
+							<button type="button" class="btn btn-light btn-block addPayloadField"><i class="fa fa-plus "></i></button>
+						</div>
+						<div class="col-lg-12 col-md-12 col-sm-12">
+							<table class="table table-bordered table-sm" id="payloadTable">
+								<thead class="thead-dark">
+									<tr>
+										<th></th>
+										<th>Key</th>
+										<th>Value</th>
+									</tr>
+								</thead>
+								<tbody class="payloadAppendable">
+									<tr>
+										<td></td>
+										<td><input name="key" type="text" class="form-control form-control-sm" /></td>
+										<td><input name="value" type="text" class="form-control form-control-sm eventPayloadValue" /></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+					<div class="row mt-4 listenerTable">
+						<div class="col-lg-12 col-md-12 col-sm-12">
+							<div class="btn-group" id="firesEvent">
+								<button class="btn btn-sm btn-success" type="button"><strong>Fires Event</strong></button>
+								<button class="btn btn-sm btn-secondary" type="button"><span class="text-invisible">i</span><i class="fas fa-plus"></i><span class="text-invisible">i</span></button>
+							</div>
+						</div>
+					</div>
+					<div class="addedListeners">
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-sm btn-primary" type="button" id="saveRequestData" data-dismiss="modal">Save</button>
+				</div>
+			</div>
+		</div>
+</body>
+<script src="./public/js/jquery/jquery-2.2.1.js"></script>
+<script src="./public/socket.io/socket/dist/socket.io.js"></script>
+<script src="./public/json.json-viewer/jquery.json-viewer.js"></script>
+<script src="./public/bootstrap.min.js"></script>
+<script src="./public/socket.io/socket/dist/socket.io.js"></script>
+<script>
+	let connected=false;
+	let Event_table ={
+		emit :{},
+		listen :{}
+	}
+	let socket =null;
+	$(document).ready(function(){
+		/**
+		 * Modal autofocus
+		 */
+		$("#eventModal").on("shown.bs.modal",function(){
+			$("#iEventName").trigger('focus');
+		})
+		$(document).on("change","#eventType",function(){
+			let eventType = $(this).val();
+			if(eventType=="listen"){
+				$(".listenerTable").hide();
+			 	$(".payloadTable").hide();
+				return;
+			}
+			$(".payloadTable").show();
+			$(".listenerTable").show();
+		});
+
+		$(document).on("click","#firesEvent",function(){
+			let totalAddedListener = $(".addedListeners").children().length
+			$(".addedListeners").append(`
+			<div class="row mt-2" id="fireEvent${totalAddedListener}">
+				<div class="col-md-3 col-sm-3 col-lg-4 col-4">
+					<div class="input-group">
+						<input class="listener form-control form-control-sm" name="listener" placeholder="Eg. MyEvent" />
+						<div class="input-group-append">
+							<button class="btn btn-sm btn-danger removeListener" data-id="fireEvent${totalAddedListener}"><strong><i class="fa fa-minus"/></strong></button>
+						</div>
+					</div>
+				</div>
+			</div>
+			`);
+		})
+		/**
+		 * Remove listener
+		 */
+		$(document).on("click",".removeListener",function(){
+			let id = $(this).attr("data-id");
+			console.log({id})
+			$(document).find(`#${id}`).remove();
+		})
+		/**
+		 * Add new Payload field
+		 */
+		$(document).on("click",".addPayloadField", function(){
+			$(".payloadAppendable").append(`
+				<tr>
+					<td></td>
+					<td><input name="key" type="text" class="form-control form-control-sm" /></td>
+					<td><input name="value" type="text" class="form-control form-control-sm eventPayloadValue"/></td>
+				</tr>
+			`)
+		})
+
+		/**
+		 * Add new Query field on Configuration Object
+		 */
+		$(document).on("click",".addConfigQuery",function(){
+			$(".appendableQuery").append(`
+					<tr>
+						<td></td>
+						<td><input name="key" type="text" class="form-control form-control-sm" /></td>
+						<td><input name="value" type="text" class="form-control form-control-sm" /></td>
+					</tr>
+			`)
+		});
+
+		/**
+		 * Connect to the server
+		 */
+		$(document).on("click","#connect",function(){
+			let host=$("#host").val();
+				socket= io.connect(host);
+				socket.on("connect",()=>{
+						if(connected){
+							connected=false;
+							socket.disconnect();
+							$('.brandHeader').removeClass("brandHeader-connected").addClass("brandHeader-default");
+							return	$("#connect").removeClass("btn-success").removeClass("btn-danger").addClass("btn-primary");
+						}
+						connected= true;
+						$('.brandHeader').removeClass("brandHeader-default").addClass("brandHeader-connected");
+						$("#connect").removeClass("btn-primary").removeClass("btn-danger").addClass("btn-success");
+				});
+				socket.on("reconnect",()=>{
+						connected= true;
+						$("#connect").removeClass("btn-danger").addClass("btn-success");
+				})
+				socket.on("disconnect",()=>{
+					connected=false
+					$('.brandHeader').removeClass("brandHeader-connected").addClass("brandHeader-default");
+					$("#connect").removeClass("btn-primary").addClass("btn-danger");
+				})
+				socket.on("connect_error",(error)=>{
+					connected=false
+					$("#connect").removeClass("btn-primary").addClass("btn-danger");
+				})
+		})
+		/**
+		 * Save Event Request Data
+		 */
+		$(document).on("click","#saveRequestData",function(){
+			let event_name =$("#iEventName").val();
+			let event_type = $("#eventType").val();
+			let payloadTableRows=$(".payloadAppendable tr");
+			let payloadTableRowLength = $(".payloadAppendable").children().length;
+			// console.log({payloadTableRowLength,payloadTableRows,event_name,event_type})
+			Event_table[event_type]={};
+			Event_table[event_type][event_name] ={
+				body : {}
+			}
+			if(payloadTableRowLength){
+				let entries=[]
+				for(let tr=0;tr<payloadTableRowLength;tr++){
+					let entry =[]
+					let tdColumns =$(payloadTableRows[tr]).children();
+					let tdColumnLength =$(payloadTableRows[tr]).children().length;
+					// console.log(tdColumnLength)
+					for(let td=1;td<tdColumnLength;td++){
+						let value = $(tdColumns[td]).children().val();
+						if(value){
+							entry.push(value);
+						}
+					}
+					if(entry.length){
+					entries.push(entry);
+					}
+				}
+				Event_table[event_type][event_name]['body']=Object.fromEntries(entries);
+			}
+
+			/**
+			 * Make currently added event active
+			 */
+			$(".eventTabList .nav-item").removeClass("active");
+			$(".eventTabList .nav-item .nav-link").removeClass("active");
+			$(".emitTabs div").removeClass("active");
+			/**
+			 * Add to tabList
+			 */
+			$(".eventTabList").append(`
+				<li class="nav-item active">
+					<a class="nav-link active" data-toggle="tab" href="#${event_name}">${event_name}</a>
+				</li>
+			`)		
+			/**
+			 * Create event content tab
+			 */
+			$('.emitTabs').append(`
+				<div id="${event_name}" class="container-fluid tab-pane active">
+								<div class="row">
+									<div class="col-md-12 col-lg-12 col-sm-12">
+										<table class="table table-bordered table-sm">
+											<thead class="thead-dark">
+												<tr>
+													<th></th>
+													<th>Key</th>
+													<th>Value</th>
+													<th></th>
+												</tr>
+											</thead>
+											<tbody class="${event_name}PayloadAppendable">
+											</tbody>
+										</table>
+									</div>
+									<div class="col-md-2 col-lg-2 col-sm-2">
+										<button type="button" class="emitEvent btn btn-success btn-sm" data-eventId="${event_name}">Emit event</button>
+									</div>
+									<div class="col-md-12 col-sm-12 col-lg-12 mt-4">
+										<!--<h5 class="callback-header"><strong>Callback Response</strong></h5>-->
+										<h6 class="response"><strong>Response</strong></h6>
+										<pre class="appendResponse"></pre>
+										<div class="server-error-container server-error-container-hidden">
+											<h3 class="server-error">Could not get any response</h3>
+											<p class="server-error">There was an error connecting to .</p>
+											<h5 class="server-error"><strong>Why this might have happened:</strong></h5>
+											<ul class="server-error">
+												<li><strong>The server couldn't send a response:</strong>Ensure that the backend is working properly</li>
+												<li><strong>Request timeout</strong>: Change request timeout in Configure Options</li>
+											</ul>
+										</div>
+									</div>
+								</div>
+							</div>
+				`)
+
+				/**
+				 * Add payload if any
+				 */
+				let body=Event_table[event_type][event_name]['body']
+				let bodyCount =Object.keys(body).length
+				if(bodyCount){
+
+					for(let key in body){
+						let value=body[key]
+						$(`#${event_name} .${event_name}PayloadAppendable`).append(`
+						<tr>
+							<td></td>
+							<td><input name="key" type="text" class="form-control form-control-sm" value="${key}"/></td>
+							<td><input name="value" type="text" class="form-control form-control-sm" value="${value}"/></td>
+							<td class="text-center">
+								<div class="btn-group">
+									<button class="btn btn-secondary" type="button"><i class="fa fa-plus"></i></button>
+									<button name="value" type="button" class="btn btn-danger"><i class="fa fa-minus"></i></button></td>
+							</div>
+						</tr>`)
+					}
+				}
+		})
+
+		/**
+		 * On click of emit tab, get list of events and generate dynamic tabs of events
+		 */
+		$(document).on("click",".emitEvent",function(){
+			let event_name =$(this).attr("data-eventId") ;
+			let eventBody =Event_table['emit'][event_name]['body'];
+			if(event_name){
+				socket.emit(event_name,eventBody,(data)=>{
+					if(data){
+					$(`#${event_name}`)
+					$(`#${event_name} .appendResponse`).jsonViewer(data,{collapsed:true,rootCollapsable:false})
+					}
+				})
+			}
+		});
+	})
+</script>
+
+</html>
