@@ -272,7 +272,6 @@ $(document).ready(function(){
         let jsonMode =ace.require("ace/mode/json").Mode;
         editor.session.setMode(new jsonMode());
         editor.setValue(JSON.stringify(body,null,"\t"),1);
-        // $(`#${event_name} .${event_name}PayloadAppendableJSON`).jsonViewer(body,{collapsed:true,rootCollapsable:false});
         $(`#${event_name} .${event_name}PayloadAppendableTable`).html(``)					
         for(let key in body){
           let value=body[key]
