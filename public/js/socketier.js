@@ -105,7 +105,6 @@ $(document).ready(function () {
    */
   $(document).on("click", "#connect", function () {
     let host = $("#host").val();
-    console.log(socketOptions)
     socket = io.connect(host,socketOptions);
     if (connected) {
       connected = false;
