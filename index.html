@@ -101,9 +101,10 @@
 		}
 		
 		.response {
-			background: whitesmoke;
+    	border-radius: 2px;
+			background: #343a40;
 			padding: 10;
-			color: #888;
+			color: #fff;
 		}
 		
 		.response.response-hidden {
@@ -123,8 +124,8 @@
 			overflow-y: scroll;
 			position: relative;
 		}
-		
-		.payloadOptions{
+
+		.payloadOptions,.eventResponse{
 			padding : 5px 0px;
 			background: #343a40 !important;
 			border :none !important;
@@ -159,7 +160,10 @@
 		}
 
 		.ace-editor{
-			height: 200px;
+			height: 100px;
+		}
+		.eventEmitButton{
+			display: inherit;
 		}
 	</style>
 </head>
